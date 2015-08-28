@@ -12,8 +12,8 @@ typedef enum Opcode{
     NOT,
     AND,
     OR,
-    NAND,
-    NOR,
+	LA,
+	SA,
     MOV,
     LI,
     LW,
@@ -107,8 +107,8 @@ Opcode stringToOpcode(char* c){
     else if(strncmp(c, "not", 3) == 0){return NOT;}
     else if(strncmp(c, "and", 3) == 0){return AND;}
     else if(strncmp(c, "or", 3) == 0){return OR;}
-    else if(strncmp(c, "nand", 3) == 0){return NAND;}
-    else if(strncmp(c, "nor", 3) == 0){return NOR;}
+    else if(strncmp(c, "la", 2) == 0){return LA;}
+    else if(strncmp(c, "sa", 2) == 0){return SA;}
     else if(strncmp(c, "mov", 3) == 0){return MOV;}
     else if(strncmp(c, "li", 2) == 0){return LI;}
     else if(strncmp(c, "lw", 2) == 0){return LW;}
@@ -161,6 +161,17 @@ void setInstruction(char* s, instruction *i, TreeMap *im_map, TreeMap *data_map)
 		sscanf(s, "%s %d %d %s", dummy_string, &(i->rs), &(i->rt), immediate_string);
 		if(tree_map_contains(immediate_string, im_map)){
 			i->immediate = toInt(tree_map_get(immediate_string, im_map));
+		} else {
+			// we dont have this label mapped!
+			assert(0);
+		}
+    }
+    else if(i->opcode == LA || i->opcode == SA){
+    	i->type = IType;
+		char immediate_string[10];
+		sscanf(s, "%s %d %s", dummy_string, &(i->rt), immediate_string);
+		if(tree_map_contains(immediate_string, data_map)){
+			i->immediate = toInt(tree_map_get(immediate_string, data_map));
 		} else {
 			// we dont have this label mapped!
 			assert(0);
@@ -287,6 +298,7 @@ int main(void)
     {
     	if(isLabel(code_string) == 0){
     		setInstruction(code_string, &i, im_map, data_map);
+    		printf("%d\n", i.opcode);
 			hex = instructionToHexString(&i);
 			writeHexString(hex_code, hex);
     	}
