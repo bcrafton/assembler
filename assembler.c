@@ -89,7 +89,7 @@ int getline(char* buffer, int* size, FILE* file)
         index++;
     }
     buffer[index] = 0;
-    if(c != -1)
+    if(index > 0)
     {
         *size = index;
         return 1;
@@ -129,6 +129,7 @@ int toInt(void *data){
 
 void setInstruction(char* s, instruction *i, TreeMap *im_map, TreeMap *data_map)
 {
+	memset(i, 0, sizeof(instruction));
     // ah we have to figure out which ones need the inst map or data map.
     char dummy_string[10];
     i->opcode = stringToOpcode(s);
@@ -253,7 +254,7 @@ int main(void)
 
     int size;
     FILE* assembly = fopen("C:\\Users\\Brian\\Desktop\\code.txt", "r");
-    FILE* hex_code = fopen("C:\\Users\\Brian\\Desktop\\hex_code.hex", "w");
+    FILE* hex_code = fopen("C:\\Users\\Brian\\Desktop\\code.hex", "w");
     char data_string[100];
     char code_string[100];
 
@@ -294,15 +295,19 @@ int main(void)
     instruction i;
     int hex;
     fseek(assembly, code_index, SEEK_SET);
+
+    strncpy(code_string, "mov 7 7", 100);
+    setInstruction(code_string, &i, im_map, data_map);
+    hex = instructionToHexString(&i);
+    writeHexString(hex_code, hex);
+
     while(getline(code_string, &size, assembly))
     {
     	if(isLabel(code_string) == 0){
     		setInstruction(code_string, &i, im_map, data_map);
-    		printf("%d\n", i.opcode);
 			hex = instructionToHexString(&i);
 			writeHexString(hex_code, hex);
     	}
-
     }
 
     fclose(hex_code);
